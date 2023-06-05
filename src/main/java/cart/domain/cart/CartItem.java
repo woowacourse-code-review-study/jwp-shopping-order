@@ -1,5 +1,6 @@
 package cart.domain.cart;
 
+import cart.domain.VO.Money;
 import cart.exception.cart.InvalidCartItemOwnerException;
 import java.util.Objects;
 
@@ -62,5 +63,17 @@ public class CartItem {
 
     public Product getProduct() {
         return product;
+    }
+
+    public String getProductName() {
+        return product.getName();
+    }
+
+    public String getProductImageUrl() {
+        return product.getImageUrl();
+    }
+
+    public Money getProductPrice() {
+        return product.getPrice();
     }
 }

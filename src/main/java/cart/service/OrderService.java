@@ -1,10 +1,7 @@
 package cart.service;
 
-import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
-import cart.domain.cart.CartItem;
-import cart.domain.cart.Product;
 import cart.domain.coupon.Coupon;
 import cart.domain.order.Order;
 import cart.domain.order.OrderItem;
@@ -40,7 +37,13 @@ public class OrderService {
         final List<Long> orderItemIds = request.getOrderItemIds();
         final List<OrderItem> orderItems = cartItemRepository.findAllByMemberId(memberId).stream()
                 .filter(cartItem -> orderItemIds.contains(cartItem.getId()))
-                .collect(collectingAndThen(toList(), this::toOrderItems));
+                .map(cartItem -> new OrderItem(
+                        cartItem.getProductName(),
+                        cartItem.getProductImageUrl(),
+                        cartItem.getProductPrice(),
+                        cartItem.getQuantity()
+                ))
+                .collect(toList());
 
         final Coupon coupon = couponRepository.findById(request.getCouponId())
                 .orElse(Coupon.EMPTY);
@@ -52,20 +55,6 @@ public class OrderService {
         cartItemRepository.deleteByIds(request.getOrderItemIds());
         couponRepository.update(order.getCoupon());
         return saveOrder.getId();
-    }
-
-    private List<OrderItem> toOrderItems(final List<CartItem> items) {
-        return items.stream()
-                .map(cartItem -> {
-                    final Product product = cartItem.getProduct();
-                    return new OrderItem(
-                            product.getName(),
-                            product.getImageUrl(),
-                            product.getPrice(),
-                            cartItem.getQuantity()
-                    );
-                })
-                .collect(toList());
     }
 
     @Transactional(readOnly = true)
